@@ -1,22 +1,23 @@
 import { Router } from "express";
 import { createProduct, deleteProduct, getProduct, getProducts, updateProduct } from "../controllers/product.controller.js";
+import { protect } from "../middleware/authmiddleware.js";
 
 const router = Router()
 
 router.route('/products').get(
-    getProducts
+    protect, getProducts
 )
 router.route('/products/:id').get(
-    getProduct
+    protect, getProduct
 )
 router.route('/create-product').post(
-    createProduct
+    protect, createProduct
 )
 router.route('/update-product/:id').put(
-    updateProduct
+    protect, updateProduct
 )
 router.route('/delete-product/:id').delete(
-    deleteProduct
+    protect, deleteProduct
 )
 
 export default router;

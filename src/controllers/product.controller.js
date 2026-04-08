@@ -20,6 +20,13 @@ export const getProducts = async (req, res) => {
 export const createProduct = async (req, res) => {
   const { name, price, image } = req.body;
 
+  if (!req.user || !req.user.userid) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
   if (!name || !price || !image) {
     return res.status(400).json({
       success: false,

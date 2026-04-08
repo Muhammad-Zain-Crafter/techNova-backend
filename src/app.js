@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
-
+import { aj } from './lib/arcjet.js';
 
 const app = express()
 
@@ -76,7 +76,8 @@ app.use(async (req, res, next) => {
 
 
 import productRouter from "./routes/product.route.js";
-import { aj } from './lib/arcjet.js';
-app.use('/api/v1', productRouter)
+import userRouter from "./routes/user.route.js";
 
+app.use('/api/v1/productStore/products', productRouter)
+app.use('/api/v1/productStore/users', userRouter)
 export default app
