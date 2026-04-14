@@ -73,4 +73,10 @@ const loginUser = async (req, res) => {
     }
 }
 
-export { registerUser, loginUser }
+const logoutUser = (req, res) => {
+    // Since JWT is stateless, we can't truly "log out" on the server side.
+    // The client should simply delete the token on their end.  
+    res.status(200).json({ message: "Logout successful. Please delete the token on the client side." });
+}
+
+export { registerUser, loginUser, logoutUser }

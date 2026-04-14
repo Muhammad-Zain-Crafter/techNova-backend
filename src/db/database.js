@@ -43,7 +43,7 @@ async function initDB() {
           status VARCHAR(20) DEFAULT 'pending'
         );
     `;
-    await SQL`
+    await sql`
         CREATE TABLE IF NOT EXISTS order_item(
           id SERIAL PRIMARY KEY,
           order_id INT REFERENCES orders(id),
@@ -51,6 +51,8 @@ async function initDB() {
           quantity INT DEFAULT 1
         );
     `;
+    // await sql`
+    //   ALTER TABLE order_item ADD COLUMN price DECIMAL(10, 2)`;
     console.log("Database initialized successfully");
   } catch (error) {
     console.log("Error initializing database:", error);
