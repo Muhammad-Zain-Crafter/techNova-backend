@@ -1,6 +1,6 @@
 import { sql } from "../db/database.js";
 
-export const getProducts = async (req, res) => {
+const getProducts = async (req, res) => {
   try {
     const products = await sql`SELECT * FROM products
         ORDER BY created_at DESC`;
@@ -17,7 +17,7 @@ export const getProducts = async (req, res) => {
   }
 };
 
-export const createProduct = async (req, res) => {
+const createProduct = async (req, res) => {
   const { name, price, image } = req.body;
 
   if (!req.user || !req.user.id) {
@@ -56,7 +56,7 @@ export const createProduct = async (req, res) => {
   }
 };
 
-export const getProduct = async (req, res) => {
+const getProduct = async (req, res) => {
   const { id } = req.params;
   try {
     const product = await sql`
@@ -73,13 +73,13 @@ export const getProduct = async (req, res) => {
   }
 };
 
-export const updateProduct = async (req, res) => {
+const updateProduct = async (req, res) => {
   const { id } = req.params;
   const { name, price, image } = req.body;
   try {
     const updatedProduct = await sql`
         UPDATE products SET name = ${name}, price = ${price}, image = ${image} WHERE id = ${id} RETURNING *;`;
-    if (!updatedProduct.length === 0) {
+    if (updatedProduct.length === 0) {
       return res.status(404).json({
         success: false,
         message: "Product not found",
@@ -97,7 +97,7 @@ export const updateProduct = async (req, res) => {
   }
 };
 
-export const deleteProduct = async (req, res) => {
+const deleteProduct = async (req, res) => {
   const { id } = req.params;
   try {
     const deleteProduct = await sql`
@@ -120,3 +120,4 @@ export const deleteProduct = async (req, res) => {
     });
   }
 };
+export { getProduct, getProducts, createProduct, updateProduct, deleteProduct };

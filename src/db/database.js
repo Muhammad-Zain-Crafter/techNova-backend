@@ -32,7 +32,8 @@ async function initDB() {
           id SERIAL PRIMARY KEY,
           user_id INT REFERENCES users(userid),
           product_id INT REFERENCES products(id),
-          quantity INT DEFAULT 1
+          quantity INT DEFAULT 1,
+          UNIQUE (user_id, product_id)
         );
     `;
     await sql`

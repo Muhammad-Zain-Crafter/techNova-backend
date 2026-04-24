@@ -1,7 +1,7 @@
 import { sql } from "../db/database.js";
 
 const createOrder = async (req, res) => {
-  const { items } = req.body; // product_id, quantity
+  const { items } = req.body; 
   if (!req.user || !req.user.id) {
     return res.status(401).json({ message: "Unauthorized" });
   }
@@ -11,17 +11,19 @@ const createOrder = async (req, res) => {
       .json({ error: "Please provide at least one item for the order" });
   }
   try {
-    let totalPrice = 0;
-    for (let item of items) {
-      const product =
-        await sql`SELECT * FROM products WHERE id = ${item.product_id}`;
-      if (product.length === 0) {
-        return res
-          .status(400)
-          .json({ error: `Product with id ${item.product_id} not found` });
+    const productIds = items.map(i => i.product_id);
+    const products = await sql`
+      SELECT * FROM products WHERE id = ANY(${productIds})
+    `;
+    let totalPrice = items.reduce((total, item) => {
+      const product = products.find(p => p.id === item.product_id);
+
+      if (!product) {
+        throw new Error(`Product not found: ${item.product_id}`);
       }
-      totalPrice += product[0].price * item.quantity;
-    }
+
+     return total + product.price * item.quantity;
+    }, 0);
     // create order:
     const newOrder = await sql`
             INSERT INTO orders (user_id, total_price, status) VALUES (${req.user.id}, ${totalPrice}, 'pending') RETURNING *`;
