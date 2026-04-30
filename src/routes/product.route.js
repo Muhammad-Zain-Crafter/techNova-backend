@@ -2,7 +2,7 @@ import { Router } from "express";
 import { createProduct, deleteProduct, getProduct, getProducts, updateProduct } from "../controllers/product.controller.js";
 import { protect } from "../middleware/authmiddleware.js";
 import { adminOnly } from "../middleware/rolemiddleware.js";
-
+import { recommendProducts } from "../controllers/ai.controller.js";
 const router = Router()
 
 router.route('/products').get(
@@ -20,5 +20,7 @@ router.route('/update-product/:id').put(
 router.route('/delete-product/:id').delete(
     protect, adminOnly, deleteProduct
 )
-
+router.route('/recommend').post(
+    protect, recommendProducts
+)
 export default router;

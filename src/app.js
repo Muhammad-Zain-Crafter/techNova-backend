@@ -78,8 +78,10 @@ app.get('/', (req, res) => {
 import productRouter from "./routes/product.route.js";
 import userRouter from "./routes/user.route.js";
 import orderRouter from "./routes/order.route.js";
+import cartRouter from "./routes/cart.route.js";
 
 app.use('/api/v1/productStore/products', productRouter)
 app.use('/api/v1/productStore/users', userRouter)
 app.use(('/api/v1/productStore/orders'), orderRouter)
+app.use(('/api/v1/productStore/cart'), cartRouter)
 export default app
