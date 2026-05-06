@@ -5,28 +5,33 @@
   "main": "src/index.js",
   "type": "module",
   "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node src/index.js",
     "dev": "nodemon src/index.js"
   },
-  "keywords": [
-    "node",
-    "express",
-    "postgresql"
-  ],
-  "author": "Zain",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Muhammad-Zain-Crafter/product-store-backend.git"
+  },
+  "keywords": [],
+  "author": "",
   "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Muhammad-Zain-Crafter/product-store-backend/issues"
+  },
+  "homepage": "https://github.com/Muhammad-Zain-Crafter/product-store-backend#readme",
   "dependencies": {
-    "@arcjet/inspect": "^1.3.0",
-    "@arcjet/node": "^1.3.0",
-    "@google/generative-ai": "^0.24.1",
-    "@neondatabase/serverless": "^1.0.2",
+    "@arcjet/node": "^1.4.0",
+    "@neondatabase/serverless": "^1.1.0",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
-    "dotenv": "^17.3.1",
+    "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "helmet": "^8.1.0",
-    "jsonwebtoken": "^9.0.3"
+    "jsonwebtoken": "^9.0.3",
+    "pg": "^8.20.0",
+    "socket.io": "^4.8.3"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"

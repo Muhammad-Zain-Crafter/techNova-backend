@@ -1,7 +1,8 @@
 import { sql } from "../db/database.js";
+import { io } from "../index.js";
 
 const createOrder = async (req, res) => {
-  const { items } = req.body; 
+  const { items } = req.body;
   if (!req.user || !req.user.id) {
     return res.status(401).json({ message: "Unauthorized" });
   }
@@ -11,22 +12,28 @@ const createOrder = async (req, res) => {
       .json({ error: "Please provide at least one item for the order" });
   }
   try {
-    const productIds = items.map(i => i.product_id);
+    const productIds = items.map((i) => i.product_id);
     const products = await sql`
       SELECT * FROM products WHERE id = ANY(${productIds})
     `;
     let totalPrice = items.reduce((total, item) => {
-      const product = products.find(p => p.id === item.product_id);
+      const product = products.find((p) => p.id === item.product_id);
 
       if (!product) {
         throw new Error(`Product not found: ${item.product_id}`);
       }
 
-     return total + product.price * item.quantity;
+      return total + product.price * item.quantity;
     }, 0);
     // create order:
     const newOrder = await sql`
             INSERT INTO orders (user_id, total_price, status) VALUES (${req.user.id}, ${totalPrice}, 'pending') RETURNING *`;
+    // emit new order event to admin clients:
+    console.log("Emitting new_order event");
+    io.emit("new_order", {
+      message: "New order received",
+      order: newOrder[0],
+    });
 
     // insert order items:
     for (let item of items) {
@@ -66,6 +73,11 @@ const cancelOrder = async (req, res) => {
     await sql`
             UPDATE orders SET status = 'cancelled' WHERE id = ${id} AND user_id = ${req.user.id}
         `;
+    console.log("Emitting order_cancelled event");
+    io.emit("order_cancelled", {
+      orderId: id,
+      userId: req.user.id,
+    });
     return res.status(200).json({ message: "Order cancelled successfully" });
   } catch (error) {
     console.error("Error cancelling order:", error);
@@ -102,26 +114,42 @@ const getAllOrders = async (req, res) => {
     return res.status(500).json({ error: "Internal server error" });
   }
 };
+
 const updateOrderStatus = async (req, res) => {
-    const { id } = req. params;
-    const { status } = req.body;
-    if (!req.user || req.user.role !== "admin") {
-        return res.status(401).json({ message: "Unauthorized" });
-    }
-    try {        const order = await sql`
+  const { id } = req.params;
+  const { status } = req.body;
+  if (!req.user || req.user.role !== "admin") {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+  try {
+    const order = await sql`
             SELECT * FROM orders WHERE id = ${id}
-        `;  
-        if (order.length === 0) {
-            return res.status(404).json({ error: "Order not found" });
-        }
-        await sql`
+        `;
+    if (order.length === 0) {
+      return res.status(404).json({ error: "Order not found" });
+    }
+    await sql`
             UPDATE orders SET status = ${status} WHERE id = ${id}
         `;
-        return res.status(200).json({ message: "Order status updated successfully" });
-    } catch (error) {
-        console.error("Error updating order status:", error);
-        return res.status(500).json({ error: "Internal server error" });
-    }                
-}
+    // Emit order status update event to clients:
+    console.log("Emitting order_status_updated event");
+    io.emit("order_status_updated", {
+      orderId: id,
+      status,
+    });
+    return res
+      .status(200)
+      .json({ message: "Order status updated successfully" });
+  } catch (error) {
+    console.error("Error updating order status:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
 
-export { createOrder, cancelOrder, getMyOrders, getAllOrders, updateOrderStatus };
+export {
+  createOrder,
+  cancelOrder,
+  getMyOrders,
+  getAllOrders,
+  updateOrderStatus,
+};
