@@ -58,3 +58,21 @@ Arcjet is integrated to protect the backend from:
 ### 1. Clone the repository
 ```bash
 git clone https://github.com/your-username/technova-backend.git
+```
+### 2. Install dependencies
+```bash
+npm install
+```
+### 3. Setup environment variables
+Create a .env file and add:
+```bash
+PGUSER=******
+PGPASSWORD=*******
+PGHOST=*******
+PGDATABASE=****
+ARCJET_ENV=development
+ARCJET_KEY=your_arcjet_key
+JWT_SECRET=your_jwt_secret
+JWT_EXPIRES_IN=jwt_expiry
+CLIENT_URL=client_url
+```
