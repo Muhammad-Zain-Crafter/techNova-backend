@@ -15,10 +15,10 @@ export const io = new Server(server, {
     origin: [
       "http://localhost:5173",
       "http://localhost:5174",
-      // "http://127.0.0.1:5500"
+      process.env.CLIENT_URL, // 👈 add this
     ],
-    credentials: true
-  }
+    credentials: true,
+  },
 });
 
 // Socket connection
@@ -31,7 +31,7 @@ io.on("connection", (socket) => {
 });
 
 initDB().then(() => {
-  server.listen(PORT, () => {
+  server.listen(PORT, "0.0.0.0", () => {
     console.log("Server is running on port " + PORT);
   });
 });
