@@ -36,6 +36,10 @@ async function initDB() {
           UNIQUE (user_id, product_id)
         );
     `;
+//     await sql`
+//   ALTER TABLE orders
+//   ADD COLUMN address_id INT REFERENCES addresses(id);
+// `;
     await sql`
         CREATE TABLE IF NOT EXISTS orders (
           id SERIAL PRIMARY KEY,
@@ -52,6 +56,19 @@ async function initDB() {
           quantity INT DEFAULT 1
         );
     `;
+    await sql`
+  CREATE TABLE IF NOT EXISTS addresses (
+    id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES users(userid) ON DELETE CASCADE,
+    full_name VARCHAR(150) NOT NULL,
+    phone VARCHAR(20) NOT NULL,
+    address_line TEXT NOT NULL,
+    city VARCHAR(100) NOT NULL,
+    state VARCHAR(100),
+    postal_code VARCHAR(20),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  );
+`;
     // await sql`
     //   ALTER TABLE order_item ADD COLUMN price DECIMAL(10, 2)`;
     console.log("Database initialized successfully");

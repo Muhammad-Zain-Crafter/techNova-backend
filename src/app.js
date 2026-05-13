@@ -33,11 +33,12 @@ app.use(
     credentials: true,
   })
 );
-// used to parse cookies from incoming requests
+// used to parse cookies from incoming requests 
 app.use(cookieParser())
 // used to set various HTTP headers for security purposes
 app.use(helmet())
 
+// test route
 app.get('/', (req, res) => {
     res.send('Welcome to the Product Store API');
 })
@@ -79,9 +80,11 @@ import productRouter from "./routes/product.route.js";
 import userRouter from "./routes/user.route.js";
 import orderRouter from "./routes/order.route.js";
 import cartRouter from "./routes/cart.route.js";
+import addressRouter from "./routes/address.route.js";
 
 app.use('/api/v1/productStore/products', productRouter)
 app.use('/api/v1/productStore/users', userRouter)
 app.use(('/api/v1/productStore/orders'), orderRouter)
 app.use(('/api/v1/productStore/cart'), cartRouter)
+app.use (('/api/v1/productStore/addresses'), addressRouter)
 export default app

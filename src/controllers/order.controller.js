@@ -2,20 +2,44 @@ import { sql } from "../db/database.js";
 import { io } from "../index.js";
 
 const createOrder = async (req, res) => {
-  const { items } = req.body;
+  const { items, address_id } = req.body;
+
   if (!req.user || !req.user.id) {
     return res.status(401).json({ message: "Unauthorized" });
   }
+
   if (!items || items.length === 0) {
-    return res
-      .status(400)
-      .json({ error: "Please provide at least one item for the order" });
+    return res.status(400).json({
+      error: "Please provide at least one item for the order",
+    });
   }
+
+  if (!address_id) {
+    return res.status(400).json({
+      error: "Please provide address_id",
+    });
+  }
+
   try {
-    const productIds = items.map((i) => i.product_id);
-    const products = await sql`
-      SELECT * FROM products WHERE id = ANY(${productIds})
+    // 1. Validate address belongs to user
+    const address = await sql`
+      SELECT * FROM addresses
+      WHERE id = ${address_id} AND user_id = ${req.user.id}
     `;
+
+    if (address.length === 0) {
+      return res.status(400).json({ error: "Invalid address" });
+    }
+
+    // 2. Get all products in one query
+    const productIds = items.map((i) => i.product_id);
+
+    const products = await sql`
+      SELECT * FROM products
+      WHERE id = ANY(${productIds})
+    `;
+
+    // 3. Calculate total
     let totalPrice = items.reduce((total, item) => {
       const product = products.find((p) => p.id === item.product_id);
 
@@ -23,26 +47,32 @@ const createOrder = async (req, res) => {
         throw new Error(`Product not found: ${item.product_id}`);
       }
 
-      return total + product.price * item.quantity;
+      return total + Number(product.price) * item.quantity;
     }, 0);
-    // create order:
+
+    // 4. Create order
     const newOrder = await sql`
-            INSERT INTO orders (user_id, total_price, status) VALUES (${req.user.id}, ${totalPrice}, 'pending') RETURNING *`;
-    // emit new order event to admin clients:
+      INSERT INTO orders (user_id, address_id, total_price, status)
+      VALUES (${req.user.id}, ${address_id}, ${totalPrice}, 'pending')
+      RETURNING *
+    `;
+
     console.log("Emitting new_order event");
     io.emit("new_order", {
       message: "New order received",
       order: newOrder[0],
     });
 
-    // insert order items:
+    // 5. Insert order items (NO extra product query)
     for (let item of items) {
-      const product = await sql`
-        SELECT * FROM products WHERE id = ${item.product_id}
-      `;
+      const product = products.find((p) => p.id === item.product_id);
+
       await sql`
-                INSERT INTO order_item (order_id, product_id, quantity, price) VALUES (${newOrder[0].id}, ${item.product_id}, ${item.quantity}, ${product[0].price}) RETURNING *`;
+        INSERT INTO order_item (order_id, product_id, quantity, price)
+        VALUES (${newOrder[0].id}, ${item.product_id}, ${item.quantity}, ${product.price})
+      `;
     }
+
     return res.status(201).json({
       success: true,
       data: newOrder[0],
@@ -69,6 +99,9 @@ const cancelOrder = async (req, res) => {
       return res
         .status(400)
         .json({ error: "Only pending orders can be cancelled" });
+    }
+    if (order[0].status === "cancel") {
+      return res.status(400).json({ error: "Order is already cancelled" });
     }
     await sql`
             UPDATE orders SET status = 'cancelled' WHERE id = ${id} AND user_id = ${req.user.id}
