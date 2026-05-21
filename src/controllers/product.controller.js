@@ -18,7 +18,7 @@ const getProducts = async (req, res) => {
 };
 
 const createProduct = async (req, res) => {
-  const { name, price, image } = req.body;
+  const { name, price, image, description } = req.body;
 
   if (!req.user || !req.user.id) {
       return res.status(401).json({
@@ -35,7 +35,7 @@ const createProduct = async (req, res) => {
   }
   try {
     const newProduct = await sql`
-        INSERT INTO products (name, price, image) VALUES (${name}, ${price}, ${image})
+        INSERT INTO products (name, price, image, description) VALUES (${name}, ${price}, ${image}, ${description})
         RETURNING *;`;
     if (!image.startsWith("http")) {
       return res.status(400).json({
@@ -78,7 +78,7 @@ const updateProduct = async (req, res) => {
   const { name, price, image } = req.body;
   try {
     const updatedProduct = await sql`
-        UPDATE products SET name = ${name}, price = ${price}, image = ${image} WHERE id = ${id} RETURNING *;`;
+        UPDATE products SET name = ${name}, price = ${price}, image = ${image}, description = ${description} WHERE id = ${id} RETURNING *;`;
     if (updatedProduct.length === 0) {
       return res.status(404).json({
         success: false,

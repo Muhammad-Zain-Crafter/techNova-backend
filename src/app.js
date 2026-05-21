@@ -75,7 +75,6 @@ app.get('/', (req, res) => {
 //   }
 // })
 
-
 import productRouter from "./routes/product.route.js";
 import userRouter from "./routes/user.route.js";
 import orderRouter from "./routes/order.route.js";

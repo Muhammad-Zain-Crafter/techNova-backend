@@ -17,6 +17,7 @@ async function initDB() {
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
     `;
+    // await sql `ALTER TABLE products ADD COLUMN description TEXT`;
     await sql`
         CREATE TABLE IF NOT EXISTS users (
             userid SERIAL PRIMARY KEY,
