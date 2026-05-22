@@ -19,11 +19,17 @@ const registerUser = async (req, res) => {
     if (!name || !email || !password) {
       return res
         .status(400)
-        .json({ error: "Please provide all required fields" });
+        .json({
+          success: false,
+          message: "Please provide all required fields",
+        });
     }
     const existedUser = await sql`SELECT * FROM users WHERE email = ${email}`;
     if (existedUser.length > 0) {
-      return res.status(400).json({ error: "User already exists" });
+      return res.status(400).json({
+        success: false,
+        message: "User already exists",
+      });
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -86,11 +92,9 @@ const loginUser = async (req, res) => {
 const logoutUser = (req, res) => {
   // Since JWT is stateless, we can't truly "log out" on the server side.
   // The client should simply delete the token on their end.
-  res
-    .status(200)
-    .json({
-      message: "Logout successful. Please delete the token on the client side.",
-    });
+  res.status(200).json({
+    message: "Logout successful. Please delete the token on the client side.",
+  });
 };
 
 export { registerUser, loginUser, logoutUser };
