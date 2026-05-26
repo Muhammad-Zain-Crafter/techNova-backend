@@ -85,27 +85,40 @@ const getProduct = async (req, res) => {
 const updateProduct = async (req, res) => {
   const { id } = req.params;
   const { name, price, image, description, category } = req.body;
+
   try {
     const updatedProduct = await sql`
-        UPDATE products SET name = ${name}, price = ${price}, image = ${image}, description = ${description}, category = ${category} WHERE id = ${id} RETURNING *;`;
+      UPDATE products 
+      SET 
+        name = COALESCE(${name}, name),
+        price = COALESCE(${price}, price),
+        image = COALESCE(${image}, image),
+        description = COALESCE(${description}, description),
+        category = COALESCE(${category}, category)
+      WHERE id = ${id}
+      RETURNING *;
+    `;
+
     if (updatedProduct.length === 0) {
       return res.status(404).json({
         success: false,
         message: "Product not found",
       });
     }
+
     res.status(200).json({
       success: true,
       data: updatedProduct[0],
     });
+
   } catch (error) {
+    console.log(error);
     res.status(500).json({
       success: false,
       message: "Error updating product",
     });
   }
 };
-
 const deleteProduct = async (req, res) => {
   const { id } = req.params;
   try {
