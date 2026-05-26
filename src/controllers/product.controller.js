@@ -18,14 +18,14 @@ const getProducts = async (req, res) => {
 };
 
 const createProduct = async (req, res) => {
-  const { name, price, image, description } = req.body;
+  const { name, price, image, description, category } = req.body;
 
   if (!req.user || !req.user.id) {
-      return res.status(401).json({
-        success: false,
-        message: "Unauthorized",
-      });
-    }
+    return res.status(401).json({
+      success: false,
+      message: "Unauthorized",
+    });
+  }
 
   if (!name || !price || !image) {
     return res.status(400).json({
@@ -33,21 +33,28 @@ const createProduct = async (req, res) => {
       message: "Name, price and image are required",
     });
   }
+
+  if (!image.startsWith("http")) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid image URL",
+    });
+  }
+
   try {
     const newProduct = await sql`
-        INSERT INTO products (name, price, image, description) VALUES (${name}, ${price}, ${image}, ${description})
-        RETURNING *;`;
-    if (!image.startsWith("http")) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid image URL",
-      });
-    }
+      INSERT INTO products (name, price, image, description, category)
+      VALUES (${name}, ${price}, ${image}, ${description}, ${category})
+      RETURNING *;
+    `;
+
     console.log("New product added:", newProduct);
+
     res.status(201).json({
       success: true,
       data: newProduct[0],
     });
+
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -75,10 +82,10 @@ const getProduct = async (req, res) => {
 
 const updateProduct = async (req, res) => {
   const { id } = req.params;
-  const { name, price, image } = req.body;
+  const { name, price, image, description, category } = req.body;
   try {
     const updatedProduct = await sql`
-        UPDATE products SET name = ${name}, price = ${price}, image = ${image}, description = ${description} WHERE id = ${id} RETURNING *;`;
+        UPDATE products SET name = ${name}, price = ${price}, image = ${image}, description = ${description}, category = ${category} WHERE id = ${id} RETURNING *;`;
     if (updatedProduct.length === 0) {
       return res.status(404).json({
         success: false,
