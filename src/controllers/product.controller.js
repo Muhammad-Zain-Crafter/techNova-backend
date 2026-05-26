@@ -20,6 +20,8 @@ const getProducts = async (req, res) => {
 const createProduct = async (req, res) => {
   const { name, price, image, description, category } = req.body;
 
+  const finalCategory = category || "General";
+
   if (!req.user || !req.user.id) {
     return res.status(401).json({
       success: false,
@@ -44,7 +46,7 @@ const createProduct = async (req, res) => {
   try {
     const newProduct = await sql`
       INSERT INTO products (name, price, image, description, category)
-      VALUES (${name}, ${price}, ${image}, ${description}, ${category})
+      VALUES (${name}, ${price}, ${image}, ${description}, ${finalCategory})
       RETURNING *;
     `;
 
