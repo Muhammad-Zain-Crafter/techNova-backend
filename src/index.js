@@ -1,10 +1,22 @@
 import http from "http";
 import { Server } from "socket.io";
-
+import cors from "cors";
 import app from "./app.js";
 import initDB from "./db/database.js";
 
 const PORT = process.env.PORT || 5000;
+
+
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:5174",
+      process.env.CLIENT_URL,
+    ],
+    credentials: true,
+  })
+);
 
 // Create HTTP server
 const server = http.createServer(app);
