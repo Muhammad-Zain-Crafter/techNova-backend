@@ -16,7 +16,7 @@ app.use(express.urlencoded({ extended: true }));
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:5174',
-  process.env.CORS_ORIGIN, 
+  process.env.CLIENT_URL, 
 ];
 
 app.use(
