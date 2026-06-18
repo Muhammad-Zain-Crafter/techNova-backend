@@ -16,4 +16,4 @@ router.route('/login').post(
 router.route('/getDashboardStats').get(
     protect, adminOnly, getDashboardStats
 )
-export default router;c
+export default router;
