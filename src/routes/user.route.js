@@ -1,6 +1,7 @@
-import { registerUser, loginUser } from "../controllers/user.controller.js";
+import { registerUser, loginUser, getDashboardStats } from "../controllers/user.controller.js";
 import { Router } from "express";
-
+import { adminOnly } from "../middleware/rolemiddleware.js";
+import { protect } from "../middleware/authmiddleware.js";
 
 const router = Router()
 
@@ -12,4 +13,7 @@ router.route('/login').post(
     loginUser
 )
 
-export default router;
+router.route('/getDashboardStats').get(
+    protect, adminOnly, getDashboardStats
+)
+export default router;c

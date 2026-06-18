@@ -97,4 +97,20 @@ const logoutUser = (req, res) => {
   });
 };
 
-export { registerUser, loginUser, logoutUser };
+const getDashboardStats = async (req, res) => {
+  const products = await sql` SELECT COUNT(*) FROM products`;
+  const users = await sql` SELECT COUNT(*) FROM users`;
+  const orders = await sql` SELECT COUNT(*) FROM orders`;
+
+  res.status(200).json(
+    {
+      success: true,
+      products: Number(products[0].count),
+      users: Number(users[0].count),
+      orders: Number(orders[0].count),
+    }
+  )
+}
+
+
+export { registerUser, loginUser, logoutUser, getDashboardStats };
