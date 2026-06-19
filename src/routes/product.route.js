@@ -6,10 +6,10 @@ import { adminOnly } from "../middleware/rolemiddleware.js";
 const router = Router()
 
 router.route('/products').get(
-    protect, getProducts
+    getProducts
 )
 router.route('/products/:id').get(
-    protect, getProduct
+    getProduct
 )
 router.route('/create-product').post(
     protect, adminOnly, createProduct
