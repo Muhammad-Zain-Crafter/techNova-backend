@@ -17,12 +17,10 @@ const registerUser = async (req, res) => {
   const { name, email, password, role } = req.body;
   try {
     if (!name || !email || !password) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Please provide all required fields",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "Please provide all required fields",
+      });
     }
     const existedUser = await sql`SELECT * FROM users WHERE email = ${email}`;
     if (existedUser.length > 0) {
@@ -97,20 +95,99 @@ const logoutUser = (req, res) => {
   });
 };
 
+const updateDetails = async (req, res) => {
+  const { name, email } = req.body;
+  const userId = req.user.id;
+  try {
+    const user = await sql`SELECT * FROM users WHERE userid = ${userId}`;
+    if (user.length === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    const updateUser = await sql`
+            UPDATE users SET name = ${name || user[0].name}, email = ${email || user[0].email} WHERE userid = ${userId}
+            RETURNING userid, name, email, role
+        `;
+    res.status(200).json({
+      success: true,
+      message: "User details updated successfully",
+      data: updateUser[0],
+    });
+  } catch (error) {
+    console.error("UPDATE ERROR:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to update user details",
+    });
+  }
+};
+
+const changePassword = async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+  const userId = req.user.id;
+
+  try {
+    const user = await sql`SELECT * FROM users WHERE userid = ${userId}`;
+    if (user.length === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    const validPassword = await bcrypt.compare(
+      currentPassword,
+      user[0].password,
+    );
+    if (!validPassword) {
+      return res.status(400).json({ error: "Invalid current password" });
+    }
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await sql`UPDATE users SET password = ${hashedPassword} WHERE userid = ${userId}`;
+
+    res.status(200).json({
+      success: true,
+      message: "Password updated successfully",
+    });
+  } catch (error) {
+    console.error("PASSWORD CHANGE ERROR:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to change password",
+    });
+  }
+};
+
+const getAllUsers = async (req, res) => {
+  try {
+    const users = await sql`SELECT userid, name, email, role FROM users`;
+    res.status(200).json({
+      success: true,
+      data: users,
+    });
+  } catch (error) {
+    console.error("GET ALL USERS ERROR:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch users",
+    });
+  }
+};
+
 const getDashboardStats = async (req, res) => {
   const products = await sql` SELECT COUNT(*) FROM products`;
   const users = await sql` SELECT COUNT(*) FROM users`;
   const orders = await sql` SELECT COUNT(*) FROM orders`;
 
-  res.status(200).json(
-    {
-      success: true,
-      products: Number(products[0].count),
-      users: Number(users[0].count),
-      orders: Number(orders[0].count),
-    }
-  )
-}
+  res.status(200).json({
+    success: true,
+    products: Number(products[0].count),
+    users: Number(users[0].count),
+    orders: Number(orders[0].count),
+  });
+};
 
-
-export { registerUser, loginUser, logoutUser, getDashboardStats };
+export {
+  registerUser,
+  loginUser,
+  logoutUser,
+  getDashboardStats,
+  updateDetails,
+  changePassword,
+  getAllUsers
+};

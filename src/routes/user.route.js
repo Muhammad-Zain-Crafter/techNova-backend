@@ -1,4 +1,4 @@
-import { registerUser, loginUser, getDashboardStats } from "../controllers/user.controller.js";
+import { registerUser, loginUser, getDashboardStats, changePassword, updateDetails, getAllUsers } from "../controllers/user.controller.js";
 import { Router } from "express";
 import { adminOnly } from "../middleware/rolemiddleware.js";
 import { protect } from "../middleware/authmiddleware.js";
@@ -16,4 +16,17 @@ router.route('/login').post(
 router.route('/getDashboardStats').get(
     protect, adminOnly, getDashboardStats
 )
+
+router.route('/getAllUsers').get(
+    protect, adminOnly, getAllUsers
+)
+
+router.route('/updateDetails').put(
+    protect, updateDetails
+)
+
+router.route('/changePassword').put(
+    protect, changePassword
+)
+
 export default router;
