@@ -41,6 +41,33 @@ const addAddress = async (req, res) => {
   }
 };
 
+const getAddress = async (req, res) => {
+  if (!req.user || !req.user.id) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  try {
+    const address = await sql`
+      SELECT *
+      FROM addresses
+      WHERE user_id = ${req.user.id}
+      ORDER BY id DESC
+      LIMIT 1
+    `;
+
+    return res.status(200).json({
+      success: true,
+      data: address.length ? address[0] : null,
+    });
+  } catch (error) {
+    console.error("Error fetching address:", error);
+
+    return res.status(500).json({
+      error: "Internal server error",
+    });
+  }
+};
+
 // DELETE ADDRESS
 const deleteAddress = async (req, res) => {
   const { id } = req.params;
@@ -77,4 +104,4 @@ const deleteAddress = async (req, res) => {
   }
 };
 
-export { addAddress, deleteAddress };
+export { addAddress, getAddress, deleteAddress };
