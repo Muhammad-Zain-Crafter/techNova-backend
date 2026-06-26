@@ -130,7 +130,7 @@ const getMyOrders = async (req, res) => {
         o.total_price,
         o.status,
         o.address_id,
-        o.created_at,
+        
 
         a.full_name,
         a.phone,
