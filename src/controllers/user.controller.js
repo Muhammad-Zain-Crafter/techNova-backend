@@ -87,6 +87,27 @@ const loginUser = async (req, res) => {
   }
 };
 
+const getProfile = async (req, res) => {
+  const userId = req.user.id;
+  try {
+    const user = await sql`
+    SELECT userid, name, email, role FROM users WHERE userid = ${userId}`;
+    if (user.length === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    res.status(200).json({
+      success: true,
+      data: user[0],
+    });
+  } catch (error) {
+    console.error("GET PROFILE ERROR:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch user profile",
+    });
+  }
+};
+
 const logoutUser = (req, res) => {
   // Since JWT is stateless, we can't truly "log out" on the server side.
   // The client should simply delete the token on their end.
@@ -189,5 +210,6 @@ export {
   getDashboardStats,
   updateDetails,
   changePassword,
-  getAllUsers
+  getAllUsers,
+  getProfile
 };

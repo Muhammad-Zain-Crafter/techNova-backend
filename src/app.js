@@ -14,9 +14,7 @@ app.use(express.json({
 app.use(express.urlencoded({ extended: true }));
 
 const allowedOrigins = [
-  'http://localhost:5173',
-  'http://localhost:5174',
-  process.env.CLIENT_URL, 
+  process.env.CLIENT_URL
 ];
 
 app.use(
@@ -27,7 +25,6 @@ app.use(
       if (!allowedOrigins.includes(origin)) {
         return callback(new Error('Not allowed by CORS'));
       }
-
       callback(null, true);
     },
     credentials: true,
