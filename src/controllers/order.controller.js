@@ -122,14 +122,64 @@ const getMyOrders = async (req, res) => {
   if (!req.user || !req.user.id) {
     return res.status(401).json({ message: "Unauthorized" });
   }
+
   try {
     const orders = await sql`
-            SELECT * FROM orders WHERE user_id = ${req.user.id} AND status != 'cancelled'
-        `;
-    return res.status(200).json({ data: orders });
+      SELECT
+        o.id,
+        o.total_price,
+        o.status,
+        o.address_id,
+        o.created_at,
+
+        a.full_name,
+        a.phone,
+        a.address_line,
+        a.city,
+        a.state,
+        a.postal_code,
+
+        json_agg(
+          json_build_object(
+            'product_id', p.id,
+            'name', p.name,
+            'image', p.image,
+            'price', oi.price,
+            'quantity', oi.quantity
+          )
+        ) AS items
+
+      FROM orders o
+
+      JOIN addresses a
+        ON a.id = o.address_id
+
+      JOIN order_item oi
+        ON oi.order_id = o.id
+
+      JOIN products p
+        ON p.id = oi.product_id
+
+      WHERE o.user_id = ${req.user.id}
+      AND o.status != 'cancelled'
+
+      GROUP BY
+        o.id,
+        a.id
+
+      ORDER BY o.id DESC
+    `;
+
+    return res.status(200).json({
+      success: true,
+      data: orders,
+    });
   } catch (error) {
-    console.error("Error fetching orders:", error);
-    return res.status(500).json({ error: "Internal server error" });
+    console.error(error);
+
+    return res.status(500).json({
+      error: "Internal server error",
+    });
   }
 };
 
