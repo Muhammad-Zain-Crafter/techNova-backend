@@ -8,7 +8,7 @@ router.route('/').post(
     protect, addAddress
 )
 router.route('/').get(
-    protect, addAddress
+    protect, getAddress
 )
 router.route('/:id').delete(
     protect, deleteAddress
