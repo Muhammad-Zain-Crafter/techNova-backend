@@ -1,7 +1,7 @@
 import { sql } from "../db/database.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-
+import { io } from "../index.js";
 // generate token
 const generateToken = (user) => {
   return jwt.sign(
@@ -37,6 +37,10 @@ const registerUser = async (req, res) => {
             INSERT INTO users (name, email, password, role) values (${name}, ${email}, ${hashedPassword}, ${role || "user"})
             RETURNING userid, name, email, role
         `;
+    io.emit("user_registered", {
+      user: newUser[0],
+    });
+
     res.status(201).json({
       success: true,
       message: "User registered successfully",
@@ -211,5 +215,5 @@ export {
   updateDetails,
   changePassword,
   getAllUsers,
-  getProfile
+  getProfile,
 };
