@@ -78,10 +78,12 @@ import userRouter from "./routes/user.route.js";
 import orderRouter from "./routes/order.route.js";
 import cartRouter from "./routes/cart.route.js";
 import addressRouter from "./routes/address.route.js";
+import reviewRouter from "./routes/review.route.js";
 
 app.use('/api/v1/productStore/products', productRouter)
 app.use('/api/v1/productStore/users', userRouter)
 app.use(('/api/v1/productStore/orders'), orderRouter)
 app.use(('/api/v1/productStore/cart'), cartRouter)
 app.use (('/api/v1/productStore/addresses'), addressRouter)
+app.use (('/api/v1/productStore/reviews'), reviewRouter)
 export default app
